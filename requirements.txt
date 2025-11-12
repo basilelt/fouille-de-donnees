@@ -12,3 +12,4 @@ scikit-image
 tqdm
 ipywidgets
 jupyter
+tensorflow

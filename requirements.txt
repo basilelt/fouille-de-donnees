@@ -9,3 +9,6 @@ kaggle
 pillow
 opencv-python
 scikit-image
+tqdm
+ipywidgets
+jupyter

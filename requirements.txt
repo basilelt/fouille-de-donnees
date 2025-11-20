@@ -1,8 +1,10 @@
+jupyter
+ipywidgets
+ipykernel
 pandas
 numpy
 matplotlib
 scikit-learn
-ipykernel
 keras
 seaborn
 kaggle
@@ -10,6 +12,5 @@ pillow
 opencv-python
 scikit-image
 tqdm
-ipywidgets
-jupyter
 tensorflow
+rich

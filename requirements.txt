@@ -16,3 +16,5 @@ tensorflow
 rich
 noisereduce
 librosa
+statsmodels
+tslearn

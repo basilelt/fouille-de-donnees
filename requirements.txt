@@ -18,3 +18,4 @@ noisereduce
 librosa
 statsmodels
 tslearn
+ure

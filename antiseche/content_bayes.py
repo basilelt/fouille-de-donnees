@@ -1,0 +1,189 @@
+# Auto-generated content module for Bayes
+# Contains embedded markdown content for this topic
+
+TOPIC_NAME = "Bayes"
+TOPIC_KEY = "bayes"
+
+CONTENT = {
+    "bayes/1.md": """# Notes sur le Classifieur Bayesien Naïf
+
+## Résumé
+
+Le classifieur bayésien utilise les probabilités, notamment le théorème de Bayes et l'hypothèse d'indépendance des attributs, pour attribuer une classe à une instance donnée. Il vise à trouver l'hypothèse (classe) la plus probable en se basant sur les observations du jeu d'entraînement, ce qui le rend utile pour diverses tâches de classification, y compris l'analyse de texte.
+
+## 1. Introduction au Classifieur Bayesien
+
+- **Objectif:** Utiliser les probabilités pour la tâche de classification.
+- **Principe:** Affecter à chaque hypothèse (classe) une probabilité d'être la bonne solution.
+- **Méthode:** Observer des instances d'entraînement pour modifier les distributions de probabilité.
+- **Tâche:** Trouver l'hypothèse la plus probable (la classe la plus probable) étant donnée une instance.
+- **Base théorique:** S'appuie sur les probabilités conditionnelles et le théorème de Bayes.
+- **Particularité:** Fait une hypothèse d'indépendance des attributs pour simplifier les calculs.
+
+## 2. Rappels de Probabilités
+
+- Probabilité d'un événement (PA): Entre 0 et 1.
+- Événement certain: P = 1.
+- Événement impossible: P = 0.
+- Indépendance de A et B: P(A ∩ B) = P(A) * P(B)
+- Probabilité de non-A: P(¬A) = 1 - P(A)
+- Probabilité Conditionnelle (P(A sachant B)): Probabilité que A apparaisse, sachant que B est apparu.
+- P(A | B) = P(A ∩ B) / P(B)
+- D'où P(A ∩ B) = P(A | B) * P(B)
+- Également P(A ∩ B) = P(B | A) * P(A)
+- Événements Indépendants: Si A et B sont indépendants, P(A | B) = P(A). La connaissance de B ne modifie pas la probabilité de A.
+
+## 3. Théorème de Bayes
+
+- Formule: P(A | B) = [P(B | A) * P(A)] / P(B)
+
+## 4. Application à la Classification (Fouille de Données)
+
+- But: Calculer pour chaque classe C_k la probabilité qu'elle soit la solution sachant une instance X (description d'objet).
+- Exemple: Pour un iris, P(setosa | pétal_length, sépal_length, ...)
+- Formule appliquée: P(Classe | Description) = [P(Description | Classe) * P(Classe)] / P(Description)
+- P(Classe | Description): Probabilité à postériori (ce que l'on cherche).
+- P(Description | Classe): Probabilité de la description sachant la classe (vraisemblance).
+- P(Classe): Probabilité a priori de la classe.
+- P(Description): Probabilité de l'instance observée.
+- Estimation des probabilités à partir du jeu d'apprentissage:
+  - P(Classe): Proportion d'instances de cette classe dans le jeu d'entraînement.
+  - Ex: Pour 50 Setosa sur 150 iris, P(Setosa) = 50/150 = 1/3.
+  - P(Description): Proportion d'instances ayant ces valeurs d'attributs.
+  - P(Description | Classe): Nombre de fois où cette description est constatée dans la classe C_k / Nombre total d'instances de la classe C_k.
+
+### 4.1 Observations sur la Formule
+
+- P(Classe | Description) augmente si P(Classe) augmente (classe plus fréquente).
+- P(Classe | Description) augmente si P(Description | Classe) augmente (description fréquente dans cette classe).
+- P(Classe | Description) diminue si P(Description) augmente (description est très courante toutes classes confondues, donc peu informative).
+
+### 4.2 Maximum A Posteriori (MAP)
+
+- On calcule P(Classe_k | Description) pour chaque classe C_k.
+- On choisit la classe C_k avec la probabilité à postériori la plus élevée (arg max).
+- Simplification: Le dénominateur P(Description) est une constante pour toutes les classes car il ne dépend pas de C_k.
+- On peut donc le retirer pour trouver le maximum:
+- argmax_k P(Classe_k | Description) = argmax_k [P(Description | Classe_k) * P(Classe_k)]
+
+## 5. Hypothèse du Bayesien Naïf: Indépendance des Attributs
+
+- Hypothèse: Les attributs sont indépendants les uns des autres sachant la classe.
+- Conséquence: P(Description | Classe) = P(a_1, a_2, ..., a_n | Classe) peut être décomposé en un produit de probabilités:
+- P(Description | Classe) = P(a_1 | Classe) * P(a_2 | Classe) * ... * P(a_n | Classe)
+- Formule finale pour le classifieur Bayesien Naïf:
+- argmax_k [P(Classe_k) * ∏_{i=1 à n} P(a_i | Classe_k)]
+- Estimation pour attributs discrets:
+- P(a_i | Classe_k) = (Nombre d'instances de Classe_k ayant la valeur a_i pour l'attribut i) / (Nombre total d'instances dans Classe_k).
+
+## 6. Exemple 1: Prédiction de popularité d'un jeu
+
+- Jeu d'entraînement: Jeux avec Genre (RPG/Action), Plateforme (Console/PC/Mobile), Budget Marketing (Faible/Moyen/Haut), et Populaire (Oui/Non).
+- Nouvelle instance à classer (X): Genre=RPG, Plateforme=PC, Budget Marketing=Medium.
+- Tâche: Prédire si le jeu sera Populaire=Oui ou Populaire=Non.
+
+### 6.1 Calculs pour Populaire=Oui (Yes)
+
+- P(Yes): Proportion de jeux "Oui" dans le jeu d'entraînement.
+- Si 3 "Oui" sur 5 jeux: P(Yes) = 3/5.
+- P(RPG | Yes): Proportion de jeux "Oui" qui sont RPG.
+- Ex: 2/3.
+- P(PC | Yes): Proportion de jeux "Oui" qui sont sur PC.
+- Ex: 1/3.
+- P(Medium | Yes): Proportion de jeux "Oui" avec budget Medium.
+- Ex: 1/3.
+- Calcul: P(Yes | X) = P(Yes) * P(RPG | Yes) * P(PC | Yes) * P(Medium | Yes)
+- P(Yes | X) = (3/5) * (2/3) * (1/3) * (1/3) = 0.0444 (valeur non normalisée)
+
+### 6.2 Calculs pour Populaire=Non (No)
+
+- P(No): Proportion de jeux "Non".
+- Si 2 "Non" sur 5 jeux: P(No) = 2/5.
+- P(RPG | No): Proportion de jeux "Non" qui sont RPG.
+- Ex: 1/2.
+- P(PC | No): Proportion de jeux "Non" qui sont sur PC.
+- Ex: 1/2.
+- P(Medium | No): Proportion de jeux "Non" avec budget Medium.
+- Ex: 1/2.
+- Calcul: P(No | X) = P(No) * P(RPG | No) * P(PC | No) * P(Medium | No)
+- P(No | X) = (2/5) * (1/2) * (1/2) * (1/2) = 0.05 (valeur non normalisée)
+
+### 6.3 Prédiction
+
+- P(No | X) (0.05) > P(Yes | X) (0.0444).
+- Prédiction: Le jeu ne sera pas populaire.
+
+### 6.4 Normalisation des Probabilités
+
+- Les probabilités obtenues par produit sont souvent très petites.
+- Méthode: Diviser chaque probabilité par la somme de toutes les probabilités des classes.
+- Somme: 0.0444 + 0.05 = 0.0944
+- P_norm(Yes | X) = 0.0444 / 0.0944 = 0.47 (47%)
+- P_norm(No | X) = 0.05 / 0.0944 = 0.53 (53%)
+- Avantage: Donne une distribution de probabilité sommée à 1, plus interprétable et donne une notion de certitude (ex: 53% vs 90%).
+
+## 7. Gestion des Très Petites Probabilités
+
+- Avec un grand nombre d'attributs (ex: 100), le produit de probabilités inférieures à 1 peut donner des valeurs extrêmement petites.
+- Solution: Travailler dans un espace logarithmique.
+- Transformation: log(a * b) = log(a) + log(b).
+- Permet de transformer un produit en une somme, évitant les sous-dépassements numériques et les valeurs trop petites.
+
+## 8. Gestion des Valeurs Numériques
+
+- Problème: Impossible de calculer P(valeur_numérique | Classe) pour chaque valeur exacte (température, taille, etc.) car trop de valeurs possibles, ou trop peu d'instances pour chaque valeur.
+- Solution: Estimer une distribution de probabilité pour les attributs numériques.
+- Le plus simple: faire l'hypothèse d'une distribution Gaussienne (normale).
+- On estime la moyenne (μ) et l'écart-type (σ) de l'attribut numérique pour chaque classe.
+- La fonction de densité de probabilité gaussienne est ensuite utilisée pour estimer P(valeur_numérique | Classe).
+
+## 9. Applications en Analyse de Texte
+
+- Très utilisé pour la classification de texte (ex: détection de spam, attribution d'auteur, classification thématique).
+- Défi: Représenter le texte non structuré en format attribut-valeur.
+- Approche 1 (Naive): Chaque mot à chaque position est un attribut.
+- Problème: Trop d'attributs et de valeurs de probabilité à estimer.
+- Approche 2 (Bag-of-Words): S'abstraire de la position des mots.
+- Représentation: Chaque mot du vocabulaire est un attribut. La valeur de l'attribut est soit sa présence/absence, soit son nombre d'occurrences (fréquence) dans le texte.
+- Permet d'estimer les probabilités (P(mot | Classe)) en calculant les fréquences des mots dans les textes de chaque classe.
+
+## 10. Avantages du Classifieur Bayesien Naïf
+
+- Facile à implémenter.
+- Relativement efficace.
+- Interprétable: Produit des distributions de probabilité qui donnent une confiance dans la classification.
+- Performant avec de petits jeux de données.
+- Passe bien à l'échelle: Peut gérer un très grand nombre de caractéristiques.
+
+## 11. Inconvénients et Limitations
+
+- Hypothèse d'indépendance des attributs: Rarement vraie dans la réalité.
+- Peut être modélisée, mais rend l'algorithme plus complexe et coûteux.
+- Problème des Zéro Probabilités:
+  - Si une valeur d'attribut n'apparaît jamais pour une certaine classe, P(attribut | Classe) sera 0.
+  - Étant donné que toutes les probabilités sont multipliées, cela annule le score de la classe, même si d'autres attributs suggèrent fortement cette classe.
+  - Solution pratique: Utiliser un petit epsilon (ε) ou une technique de lissage (ex: lissage de Laplace) au lieu de 0 pour les probabilités nulles.
+- Modèles complexes: Moins adapté aux modèles avec beaucoup d'interactions complexes entre les caractéristiques.
+- Des extensions existent pour modéliser ces interactions, mais sont plus coûteuses.
+
+Le Bayesien Naïf est une base solide et performante pour des problématiques simples, avec de nombreuses évolutions pour des cas plus complexes."""
+}
+
+
+def get_files():
+    """Return list of files in this topic."""
+    return sorted(CONTENT.keys())
+
+
+def get_content(file_key):
+    """Get content for a specific file."""
+    return CONTENT.get(file_key, "")
+
+
+def search(query):
+    """Search for query in topic content."""
+    results = []
+    for file_key, content in CONTENT.items():
+        if query.lower() in content.lower():
+            results.append(file_key)
+    return results

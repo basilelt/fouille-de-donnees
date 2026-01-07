@@ -1,0 +1,204 @@
+# Auto-generated content module for Time Series
+# Contains embedded markdown content for this topic
+
+TOPIC_NAME = "Time Series"
+TOPIC_KEY = "time-series"
+
+CONTENT = {
+    "time-series/1.md": """# Time Series Data Mining: Comprehensive Notes
+
+This document provides a comprehensive overview of time series data mining, covering definitions, characteristics, types, decomposition, statistical feature extraction, and various analytical techniques including forecasting, imputation, classification, extrinsic regression, handling unequal lengths, and dimensionality reduction. It emphasizes the crucial role of temporal order in time series analysis.
+
+## 1. Introduction to Time Series
+
+### What are Time Series?
+
+- **Definition**: Ordered sequence of data points, typically measured at successive points in time.
+- **Key Property**: Temporal order matters, unlike in tabular datasets.
+- **Examples**:
+  - Air Passengers Time Series (1950-1960 data shown)
+  - Natural Sciences: Climate measurements, seismic activity
+  - Engineering: Sensor readings, energy consumption data
+  - Finance: Stock prices, exchange rates
+  - Healthcare: Patient monitoring, ECG signals
+
+### Univariate and Multivariate Time Series
+
+- **Univariate Time Series**:
+  - Observations of a single variable over time.
+  - Example: Daily temperature readings, stock prices.
+- **Multivariate Time Series**:
+  - Observations of multiple variables over time.
+  - Captures relationships or dependencies between variables.
+  - Example: Weather data (temperature, humidity, wind speed), financial market (Stock 1, Stock 2, Stock 3 from 2023-01-01 to 2023-04-01).
+
+### Comparison to Tabular Data: Importance of Ordering
+
+- **Tabular Data**: No inherent order between rows.
+- **Time Series Data**:
+  - Ordering of observations is crucial; it reflects temporal relationships.
+  - Patterns like trends, seasonality, and cyclic behaviors rely on temporal order.
+  - Reversing time order disrupts interpretability and prediction accuracy.
+
+### Decomposition of Time Series
+
+- **Time Series Components**:
+  - **Trend**: Long-term progression or direction in the data.
+  - **Seasonality**: Regular and repeating patterns over fixed time periods.
+  - **Cyclic Patterns**: Irregular, long-term fluctuations not tied to fixed intervals.
+  - **Noise**: Random variations or irregularities with no discernible pattern.
+- **Example**: Sales data may exhibit an upward trend, annual seasonality, economic cycles, and random noise.
+
+## 2. Statistics-Based Feature Extraction
+
+### Mean, Standard Deviation, and Z-Normalization
+
+- **Mean (µ)**: Average value of a time series.
+  - Formula: µ = (1/n) * Σ(xi)
+- **Standard Deviation (σ)**: Measure of the spread or dispersion of the data.
+  - Formula: σ = sqrt((1/n) * Σ(xi - µ)^2)
+- **Z-Normalization**: Standardizes time series to have mean 0 and standard deviation 1.
+  - Formula: zi = (xi - µ) / σ
+  - Removes scale and offset differences for better comparison.
+
+### Temporal Auto-Correlation
+
+- **Definition**: Measures the correlation of a time series with a lagged version of itself.
+- Indicates how past values influence future values within the series.
+- Formula: ρk = Σ(xt - µ)(xt+k - µ) / Σ(xt - µ)^2
+- k: Lag; µ: Mean of the series.
+- Applications: Identifying repeating patterns or dependencies; used in models like ARIMA and forecasting tasks.
+
+### Fourier Transform for Time Series
+
+- **Definition**: Decomposes a time series into its frequency components.
+- Represents the series as a sum of sinusoidal functions (sines and cosines).
+- Key Formula: F(f) = Σ(xt * e^(-2πi * ft/N))
+- F(f): Complex frequency component at index f; xt: Signal value at time t.
+- Applications: Identifying dominant frequencies in the data; filtering noise or periodicity detection.
+- Note (from handwritten source): Fourier Transform might be considered more reliable for outliers, as a perturbed mean might cause a "shift to the right" (dicaler a' choite).
+
+### catch22: Canonical Time-Series Characteristics
+
+- **Definition**: CAnonical Time-series CHaracteristics with 22 features.
+- A set of handcrafted statistical features designed for time series classification and analysis.
+- Key Features: Includes measures of distribution, autocorrelation, entropy, and non-linear properties (e.g., Mean autocorrelation, fluctuation analysis, entropy metrics).
+- Advantages: Computationally efficient and interpretable; provides a compact feature set for quick analysis and classification tasks.
+
+## 3. Time Series Analysis
+
+### General Time Series Analysis Tasks
+
+- Classification
+- Clustering
+- Extrinsic Regression
+- Prototyping / Generation
+- Forecasting
+- Anomaly Detection
+
+### 3.1 Time Series Forecasting/Regression
+
+- **Definition**: Predicting future values based on past data. A regression problem where temporal ordering plays a key role.
+- Key Idea: Given a time series X = {x1, x2, ..., xt}, predict xt+1, xt+2, ....
+- Applications: Financial market prediction, demand forecasting, climate modeling and weather prediction.
+- Note (from handwritten source): Regression is mentioned possibly for 1% of the series when imputation is not possible.
+
+#### Moving Average Model (MA)
+
+- **Definition**: Statistical model predicting the next value as a linear combination of past forecast errors. Captures short-term dependencies.
+- Key Formula: xt = µ + Σ(θi * ϵt-i) + ϵt
+- µ: Mean of the series; ϵt: White noise at time t; θi: Parameters; q: Order of the model.
+- Applications: Smoothing noisy time series data; short-term prediction in finance and weather.
+
+#### Auto Regressive Model (AR)
+
+- **Definition**: Model predicting the current value as a linear combination of its past values. Captures influence of previous time steps.
+- Key Formula: xt = c + Σ(φi * xt-i) + ϵt
+- c: Constant term; φi: Parameters; ϵt: White noise at time t; p: Order of the model.
+- Applications: Modeling and forecasting time series with strong temporal dependencies (economics, finance, weather prediction).
+
+### 3.2 Time Series Imputation
+
+- **Definition**: Filling in missing values within a time series.
+
+#### Methods for Replacing Missing Values
+
+- **Replacing with Mean**:
+  - Method: Compute mean µ of observed values, replace each missing value with µ.
+  - Advantages: Simple, computationally efficient, preserves overall average.
+  - Limitations: May not capture temporal structure, can distort patterns if missing values are frequent.
+- **Replacing with Median**:
+  - Compute the median of observed values.
+  - Less sensitive to outliers compared to the mean; suitable for skewed distributions.
+- **Forward Fill (ffill)**: Replace missing values with the last observed value.
+- **Backward Fill (bfill)**: Replace missing values with the next observed value.
+- Advantages (ffill/bfill): Preserves local trends and continuity. Useful in real-time data streams and sensor readings.
+
+### 3.3 Time Series Classification
+
+- **Definition**: Assigning a category or label to a time series based on its patterns or features.
+
+#### K-Nearest Neighbors (KNN) with Euclidean Distance (ED)
+
+- Compares the distance between time series to find the closest match.
+- Limitations: Requires series of equal length; insensitive to temporal shifting or frequency variations.
+
+#### Dynamic Time Warping (DTW)
+
+- Aligns two time series with shifting and scaling to measure similarity.
+- Overcomes the limitations of KNN with ED by handling temporal distortions.
+- Applications: Activity recognition, fault detection, medical diagnostics.
+- Note (from handwritten source): classification a valeur Continue (classification with continuous value) refers to predicting a continuous label, which is covered under Extrinsic Regression.
+
+### 3.4 Handling Unequal Length Series
+
+- **Challenges**: Time series often have different lengths due to varying sampling durations or missing data.
+- **Methods**:
+  - **Padding**: Extend shorter series with zeros or other placeholder values.
+  - **Truncation**: Trim longer series to match the shortest series length.
+  - **Dynamic Time Warping (DTW)**: Aligns time series of unequal length by allowing non-linear mappings of time indices, preserving important temporal patterns.
+
+### 3.5 Dimensionality Reduction/Symbolization of Time Series Data
+
+#### Dimensionality Reduction
+
+- **Principal Component Analysis (PCA)**: Can reduce dimensions, but does not account for temporal ordering.
+- **Piecewise Aggregate Approximation (PAA)**: Reduces dimensionality by dividing the time series into equal-sized segments and averaging values within each segment.
+
+#### Symbolization
+
+- **Symbolic Aggregate approXimation (SAX)**: Converts PAA segments into symbols for simplified representation.
+- **Symbolic Fourier Approximation (SFA)**: Utilizes Fourier Transform coefficients for symbolization.
+
+## Conclusion (Key Takeaways)
+
+- Time series are temporally ordered datasets crucial in fields like healthcare, finance, and engineering, characterized by temporal dependency, seasonality, and trends.
+- They can be Univariate (single variable) or Multivariate (multiple variables with dependencies).
+- Key techniques include:
+  - Decomposition into components (trend, seasonality, cyclic patterns, noise).
+  - Statistical features (mean, standard deviation, Z-normalization, auto-correlation, Fourier Transform, catch22).
+  - Models like AR and MA for forecasting.
+  - Imputation methods for missing data (mean, median, forward/backward fill).
+  - Classification (KNN, DTW) and Extrinsic Regression (KNN-DTW, Random Forest, SVR, XGBoost).
+  - Methods for handling unequal length series (padding, truncation, DTW).
+  - Dimensionality reduction (PAA, PCA) and symbolization (SAX, SFA)."""
+}
+
+
+def get_files():
+    """Return list of files in this topic."""
+    return sorted(CONTENT.keys())
+
+
+def get_content(file_key):
+    """Get content for a specific file."""
+    return CONTENT.get(file_key, "")
+
+
+def search(query):
+    """Search for query in topic content."""
+    results = []
+    for file_key, content in CONTENT.items():
+        if query.lower() in content.lower():
+            results.append(file_key)
+    return results

@@ -131,28 +131,65 @@ def generate_single_file(topics):
 # Auto-generated single file for Numworks calculator
 # All functionality in one file for Numworks compatibility
 
-import re
 import math
 
 # Utilities functions
 
 def strip_markdown(text):
     """Strip basic markdown syntax from text."""
-    # Remove headers
-    text = re.sub(r"^#+\\s*", "", text, flags=re.MULTILINE)
-    # Remove links
-    text = re.sub(r"\\[([^\\]]+)\\]\\([^\\)]+\\)", r"\\1", text)
-    # Remove bold
-    text = re.sub(r"\\*\\*([^\\*]+)\\*\\*", r"\\1", text)
-    # Remove italic
-    text = re.sub(r"\\*([^\\*]+)\\*", r"\\1", text)
-    # Remove code blocks
-    text = re.sub(r"```[\\s\\S]*?```", "", text)
-    # Remove inline code
-    text = re.sub(r"`([^`]+)`", r"\\1", text)
-    # Remove lists
-    text = re.sub(r"^[\\s]*[-\\*\\+]\\s*", "", text, flags=re.MULTILINE)
-    return text
+    lines = text.split('\\n')
+    stripped_lines = []
+    in_code_block = False
+    for line in lines:
+        # Handle code blocks
+        if line.strip().startswith('```'):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        # Remove headers
+        if line.strip().startswith('#'):
+            i = 0
+            while i < len(line) and line[i] in '# \\t':
+                i += 1
+            line = line[i:]
+        # Remove inline code
+        new_line = ''
+        i = 0
+        while i < len(line):
+            if line[i] == '`':
+                j = i + 1
+                while j < len(line) and line[j] != '`':
+                    j += 1
+                if j < len(line):
+                    i = j + 1
+                else:
+                    new_line += line[i]
+                    i += 1
+            else:
+                new_line += line[i]
+                i += 1
+        line = new_line
+        # Remove bold and italic markers
+        line = line.replace('**', '').replace('*', '')
+        # Remove links [text](url) -> text
+        while '[' in line and ']' in line:
+            start = line.find('[')
+            end = line.find(']', start)
+            if end != -1 and end + 1 < len(line) and line[end + 1] == '(':
+                close = line.find(')', end + 1)
+                if close != -1:
+                    text = line[start + 1:end]
+                    line = line[:start] + text + line[close + 1:]
+                else:
+                    break
+            else:
+                break
+        # Remove list markers
+        if line.strip() and len(line.lstrip()) > 1 and line.lstrip()[0] in '-*+' and line.lstrip()[1] in ' \\t':
+            line = line.lstrip()[1:].lstrip()
+        stripped_lines.append(line)
+    return '\\n'.join(stripped_lines)
 
 def display_text(text, max_lines=20):
     """Display text in chunks for limited screen."""
@@ -298,7 +335,7 @@ def execute_math():
 
 TOPIC_CONTENTS = content_dict_str
 
-TOPIC_DISPLAY_NAMES = {display_names_str}
+TOPIC_DISPLAY_NAMES = display_names_str
 
 # Content functions
 

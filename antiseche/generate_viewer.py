@@ -506,8 +506,7 @@ def main():
         else:
             print("Invalid choice.")
 
-if __name__ == "__main__":
-    main()
+main()
 '''
     return template.replace("content_dict_str", content_dict_str).replace(
         "display_names_str", display_names_str

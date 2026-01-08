@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 """
 Generator script that reads all markdown files from the antiseche directory
-and generates multiple Python modules with embedded content.
+and generates a single Python file with embedded content for Numworks calculator.
 
-Generated files (all in the same directory for Numworks compatibility):
-- utilities.py (markdown stripping and display functions)
-- calculators.py (all calculator functions)
-- content_<topic>.py (one per topic directory)
-- main.py (user interaction menu)
+Generated file:
+- main.py (all functionality in one file for Numworks compatibility)
 
-Note: Numworks calculators don't support subdirectories, so all files
-are generated in the same flat directory.
+Note: Numworks calculators don't support loading from other scripts, so everything
+must fit in one file.
 """
 
 import os
@@ -18,6 +15,7 @@ from pathlib import Path
 from collections import defaultdict
 
 MAX_FILE_SIZE = 43000  # Maximum characters per file
+MAX_LINE_LENGTH = 80  # Maximum characters per line for Numworks
 
 
 def find_md_files(base_dir):
@@ -39,12 +37,38 @@ def read_file_content(filepath):
         return f.read()
 
 
-def escape_content(content):
-    """Escape content for embedding in Python string."""
+def break_long_lines(text, max_length=MAX_LINE_LENGTH):
+    """Break lines longer than max_length."""
+    lines = text.split("\n")
+    broken_lines = []
+    for line in lines:
+        if len(line) <= max_length:
+            broken_lines.append(line)
+        else:
+            # Break at spaces if possible
+            words = line.split(" ")
+            current_line = ""
+            for word in words:
+                if len(current_line) + len(word) + 1 <= max_length:
+                    if current_line:
+                        current_line += " " + word
+                    else:
+                        current_line = word
+                else:
+                    if current_line:
+                        broken_lines.append(current_line)
+                    current_line = word
+            if current_line:
+                broken_lines.append(current_line)
+    return "\n".join(broken_lines)
+
+
+def escape_line(line):
+    """Escape a line for embedding in Python string list."""
     # Escape backslashes first, then quotes
-    content = content.replace("\\", "\\\\")
-    content = content.replace('"""', '\\"\\"\\"')
-    return content
+    line = line.replace("\\", "\\\\")
+    line = line.replace('"', '\\"')
+    return line
 
 
 def get_topic_from_path(rel_path):
@@ -72,13 +96,45 @@ def group_files_by_topic(md_files):
     return topics
 
 
-def generate_utilities_module():
-    """Generate the utilities.py module content."""
-    return '''# Auto-generated utilities module
-# Contains markdown processing and display functions
+def generate_single_file(topics):
+    """Generate a single file containing all functionality for Numworks."""
+    # Build content dict
+    content_entries = []
+    topic_display_names = {}
+    for topic in sorted(topics.keys()):
+        display_name = topic.replace("-", " ").replace("_", " ").title()
+        topic_display_names[topic] = display_name
+        files_content = []
+        for rel_path, full_path in topics[topic]:
+            content = read_file_content(full_path)
+            lines = content.split("\n")
+            escaped_lines = [f'            "{escape_line(line)}"' for line in lines]
+            key = rel_path.replace("\\", "/")
+            files_content.append(
+                f'        "{key}": [\n' + ",\n".join(escaped_lines) + "\n        ]"
+            )
+        content_entries.append(
+            f'    "{topic}": {{\n' + ",\n".join(files_content) + "\n    }"
+        )
+
+    content_dict_str = "{\n" + ",\n".join(content_entries) + "\n}"
+
+    display_names_str = (
+        "{\n"
+        + ",\n".join(
+            f'    "{topic}": "{name}"' for topic, name in topic_display_names.items()
+        )
+        + "\n}"
+    )
+
+    template = '''#!/usr/bin/env python3
+# Auto-generated single file for Numworks calculator
+# All functionality in one file for Numworks compatibility
 
 import re
+import math
 
+# Utilities functions
 
 def strip_markdown(text):
     """Strip basic markdown syntax from text."""
@@ -98,7 +154,6 @@ def strip_markdown(text):
     text = re.sub(r"^[\\s]*[-\\*\\+]\\s*", "", text, flags=re.MULTILINE)
     return text
 
-
 def display_text(text, max_lines=20):
     """Display text in chunks for limited screen."""
     lines = text.split("\\n")
@@ -107,16 +162,8 @@ def display_text(text, max_lines=20):
         print(chunk)
         if i + max_lines < len(lines):
             input("Press Enter to continue...")
-'''
 
-
-def generate_calculators_module():
-    """Generate the calculators.py module content."""
-    return '''# Auto-generated calculators module
-# Contains all calculator functions for data mining concepts
-
-import math
-
+# Calculators functions
 
 def bayes_calculator():
     """Interactive Bayes theorem calculator."""
@@ -126,12 +173,11 @@ def bayes_calculator():
         likelihood = float(input("Enter likelihood P(E|H): "))
         evidence = float(input("Enter evidence P(E): "))
         posterior = (prior * likelihood) / evidence
-        print(f"Posterior probability P(H|E): {posterior}")
+        print("Posterior probability P(H|E): {}".format(posterior))
     except ValueError:
         print("Invalid input. Please enter numbers.")
     except ZeroDivisionError:
         print("Error: Evidence P(E) cannot be zero.")
-
 
 def euclidean_distance_calculator():
     """Interactive Euclidean distance calculator."""
@@ -141,15 +187,14 @@ def euclidean_distance_calculator():
         point1 = []
         point2 = []
         for i in range(n):
-            p1 = float(input(f"Enter coordinate {i+1} for point 1: "))
-            p2 = float(input(f"Enter coordinate {i+1} for point 2: "))
+            p1 = float(input("Enter coordinate {} for point 1: ".format(i+1)))
+            p2 = float(input("Enter coordinate {} for point 2: ".format(i+1)))
             point1.append(p1)
             point2.append(p2)
         distance = sum((a - b) ** 2 for a, b in zip(point1, point2)) ** 0.5
-        print(f"Euclidean distance: {distance}")
+        print("Euclidean distance: {}".format(distance))
     except ValueError:
         print("Invalid input. Please enter numbers.")
-
 
 def manhattan_distance_calculator():
     """Interactive Manhattan distance calculator."""
@@ -159,15 +204,14 @@ def manhattan_distance_calculator():
         point1 = []
         point2 = []
         for i in range(n):
-            p1 = float(input(f"Enter coordinate {i+1} for point 1: "))
-            p2 = float(input(f"Enter coordinate {i+1} for point 2: "))
+            p1 = float(input("Enter coordinate {} for point 1: ".format(i+1)))
+            p2 = float(input("Enter coordinate {} for point 2: ".format(i+1)))
             point1.append(p1)
             point2.append(p2)
         distance = sum(abs(a - b) for a, b in zip(point1, point2))
-        print(f"Manhattan distance: {distance}")
+        print("Manhattan distance: {}".format(distance))
     except ValueError:
         print("Invalid input. Please enter numbers.")
-
 
 def entropy_calculator():
     """Interactive entropy calculator."""
@@ -183,10 +227,9 @@ def entropy_calculator():
             print("No probabilities entered.")
             return
         entropy = -sum(p * math.log2(p) for p in probs if p > 0)
-        print(f"Entropy: {entropy}")
+        print("Entropy: {}".format(entropy))
     except ValueError:
         print("Invalid input. Please enter numbers.")
-
 
 def gini_calculator():
     """Interactive Gini impurity calculator."""
@@ -202,10 +245,9 @@ def gini_calculator():
             print("No probabilities entered.")
             return
         gini = 1 - sum(p ** 2 for p in probs)
-        print(f"Gini impurity: {gini}")
+        print("Gini impurity: {}".format(gini))
     except ValueError:
         print("Invalid input. Please enter numbers.")
-
 
 def information_gain_calculator():
     """Interactive information gain calculator."""
@@ -214,28 +256,25 @@ def information_gain_calculator():
         parent_entropy = float(input("Enter parent entropy: "))
         n_children = int(input("Enter number of child nodes: "))
         total_samples = int(input("Enter total samples in parent: "))
-        
         weighted_child_entropy = 0
         for i in range(n_children):
-            samples = int(input(f"Enter samples in child {i+1}: "))
-            entropy = float(input(f"Enter entropy of child {i+1}: "))
+            samples = int(input("Enter samples in child {}: ".format(i+1)))
+            entropy = float(input("Enter entropy of child {}: ".format(i+1)))
             weighted_child_entropy += (samples / total_samples) * entropy
-        
         info_gain = parent_entropy - weighted_child_entropy
-        print(f"Information Gain: {info_gain}")
+        print("Information Gain: {}".format(info_gain))
     except ValueError:
         print("Invalid input. Please enter numbers.")
     except ZeroDivisionError:
         print("Error: Total samples cannot be zero.")
 
-
 def execute_math():
     """Simple math expression evaluator."""
     print("Math Executor")
-    print("Available functions: sqrt, sin, cos, tan, log, log2, log10, exp, pow, abs")
+    print("Available functions: sqrt, sin, cos, tan, log, log2,")
+    print("log10, exp, pow, abs")
     expr = input("Enter math expression: ")
     try:
-        # Create a safe namespace with math functions
         safe_dict = {
             "sqrt": math.sqrt,
             "sin": math.sin,
@@ -251,205 +290,129 @@ def execute_math():
             "e": math.e,
         }
         result = eval(expr, {"__builtins__": {}}, safe_dict)
-        print(f"Result: {result}")
+        print("Result: {}".format(result))
     except Exception as e:
-        print(f"Invalid expression: {e}")
-'''
+        print("Invalid expression: {}".format(e))
 
+# Content data
 
-def generate_content_module(topic, files):
-    """Generate a content module for a specific topic."""
-    module_name = sanitize_module_name(topic)
+TOPIC_CONTENTS = content_dict_str
 
-    content_entries = []
-    for rel_path, full_path in files:
-        content = read_file_content(full_path)
-        escaped_content = escape_content(content)
-        key = rel_path.replace("\\", "/")
-        content_entries.append(f'    "{key}": """{escaped_content}"""')
+TOPIC_DISPLAY_NAMES = {display_names_str}
 
-    embedded_dict = "{\n" + ",\n".join(content_entries) + "\n}"
-
-    # Get display name for topic
-    display_name = topic.replace("-", " ").replace("_", " ").title()
-
-    return f'''# Auto-generated content module for {display_name}
-# Contains embedded markdown content for this topic
-
-TOPIC_NAME = "{display_name}"
-TOPIC_KEY = "{topic}"
-
-CONTENT = {embedded_dict}
-
-
-def get_files():
-    """Return list of files in this topic."""
-    return sorted(CONTENT.keys())
-
-
-def get_content(file_key):
-    """Get content for a specific file."""
-    return CONTENT.get(file_key, "")
-
-
-def search(query):
-    """Search for query in topic content."""
-    results = []
-    for file_key, content in CONTENT.items():
-        if query.lower() in content.lower():
-            results.append(file_key)
-    return results
-'''
-
-
-def generate_main_module(topics):
-    """Generate main.py with the interactive menu (flat imports for Numworks)."""
-    # Build topic imports - flat structure, no package
-    topic_imports = []
-    topic_module_mappings = []
-    for topic in sorted(topics.keys()):
-        module_name = sanitize_module_name(topic)
-        topic_imports.append(f"import content_{module_name}")
-        topic_module_mappings.append(f'    "{topic}": content_{module_name},')
-
-    imports_str = "\n".join(topic_imports)
-    mappings_str = "\n".join(topic_module_mappings)
-
-    # Build topic menu entries
-    topic_entries = []
-    for i, topic in enumerate(sorted(topics.keys()), 1):
-        display_name = topic.replace("-", " ").replace("_", " ").title()
-        topic_entries.append(f'    "{i}": ("{topic}", "{display_name}"),')
-    topics_str = "\n".join(topic_entries)
-
-    return f'''#!/usr/bin/env python3
-# Auto-generated main module for Numworks calculator
-# Provides interactive menu for course viewer and calculators
-# All imports are flat (no subdirectories) for Numworks compatibility
-
-from utilities import strip_markdown, display_text
-from calculators import (
-    bayes_calculator,
-    euclidean_distance_calculator,
-    manhattan_distance_calculator,
-    entropy_calculator,
-    gini_calculator,
-    information_gain_calculator,
-    execute_math,
-)
-{imports_str}
-
-# Topic modules registry
-TOPIC_MODULES = {{
-{mappings_str}
-}}
-
-TOPICS = {{
-{topics_str}
-}}
-
+# Content functions
 
 def get_all_topics():
     """Return list of all available topics."""
-    return sorted(TOPIC_MODULES.keys())
+    return sorted(TOPIC_CONTENTS.keys())
 
+def get_topic_content(topic):
+    """Get content dict for a topic."""
+    return TOPIC_CONTENTS.get(topic, {{}})
 
-def get_topic_module(topic):
-    """Get the module for a specific topic."""
-    return TOPIC_MODULES.get(topic)
+def get_files(topic):
+    """Return list of files in a topic."""
+    return sorted(get_topic_content(topic).keys())
 
+def get_content(topic, file_key):
+    """Get content for a specific file in a topic."""
+    lines = get_topic_content(topic).get(file_key, [])
+    return "\\n".join(lines)
+
+def search_topic(topic, query):
+    """Search for query in a topic."""
+    results = []
+    for file_key, content in get_topic_content(topic).items():
+        if query.lower() in "\\n".join(content).lower():
+            results.append(file_key)
+    return results
+
+def search_all_topics(query):
+    """Search across all topics."""
+    results = []
+    for topic in get_all_topics():
+        for file_key in search_topic(topic, query):
+            results.append((topic, file_key))
+    return results
+
+# Menu functions
 
 def view_topic_menu():
     """Display topic selection menu."""
     print("\\nAvailable Topics:")
-    for key, (topic_key, display_name) in sorted(TOPICS.items(), key=lambda x: int(x[0])):
-        print(f"{{key}}. {{display_name}}")
+    topics = get_all_topics()
+    for i, topic in enumerate(topics, 1):
+        display_name = TOPIC_DISPLAY_NAMES.get(topic, topic)
+        print("{}. {}".format(i, display_name))
     print("0. Back to main menu")
-    
     choice = input("\\nSelect a topic: ")
     if choice == "0":
         return
-    
-    if choice in TOPICS:
-        topic_key, display_name = TOPICS[choice]
-        view_topic_files(topic_key, display_name)
-    else:
-        print("Invalid choice.")
-
+    try:
+        idx = int(choice) - 1
+        if 0 <= idx < len(topics):
+            topic_key = topics[idx]
+            display_name = TOPIC_DISPLAY_NAMES.get(topic_key, topic_key)
+            view_topic_files(topic_key, display_name)
+        else:
+            print("Invalid choice.")
+    except ValueError:
+        print("Invalid input.")
 
 def view_topic_files(topic_key, display_name):
     """View files within a specific topic."""
-    module = get_topic_module(topic_key)
-    if not module:
-        print(f"Topic '{{topic_key}}' not found.")
-        return
-    
-    files = module.get_files()
+    files = get_files(topic_key)
     if not files:
-        print(f"No files found in {{display_name}}.")
+        print("No files found in {}.".format(display_name))
         return
-    
     while True:
-        print(f"\\n{{display_name}} - Available Files:")
+        print("\\n{} - Available Files:".format(display_name))
         for i, file in enumerate(files, 1):
-            print(f"{{i}}. {{file}}")
+            print("{}. {}".format(i, file))
         print("0. Back to topics")
-        
         choice = input("\\nSelect a file to view: ")
         if choice == "0":
             return
-        
         try:
             idx = int(choice) - 1
             if 0 <= idx < len(files):
-                content = module.get_content(files[idx])
+                content = get_content(topic_key, files[idx])
                 stripped = strip_markdown(content)
-                print(f"\\n--- {{files[idx]}} ---\\n")
+                print("\\n--- {} ---\\n".format(files[idx]))
                 display_text(stripped)
             else:
                 print("Invalid choice.")
         except ValueError:
             print("Invalid input.")
 
-
-def search_all_topics():
+def search_all_topics_menu():
     """Search across all topics."""
     query = input("Enter search query: ")
     if not query:
         return
-    
-    results = []
-    for topic_key in get_all_topics():
-        module = get_topic_module(topic_key)
-        if module:
-            for file_key in module.search(query):
-                results.append((topic_key, file_key, module))
-    
+    results = search_all_topics(query)
     if not results:
         print("No matches found.")
         return
-    
-    print(f"\\nFound {{len(results)}} matches:")
-    for i, (topic, file_key, _) in enumerate(results, 1):
-        print(f"{{i}}. [{{topic}}] {{file_key}}")
-    
+    print("\\nFound {} matches:".format(len(results)))
+    for i, (topic, file_key) in enumerate(results, 1):
+        display_name = TOPIC_DISPLAY_NAMES.get(topic, topic)
+        print("{}. [{}] {}".format(i, display_name, file_key))
     choice = input("\\nEnter number to view (or 'q' to quit): ")
     if choice.lower() == "q":
         return
-    
     try:
         idx = int(choice) - 1
         if 0 <= idx < len(results):
-            topic, file_key, module = results[idx]
-            content = module.get_content(file_key)
+            topic, file_key = results[idx]
+            content = get_content(topic, file_key)
             stripped = strip_markdown(content)
-            print(f"\\n--- {{file_key}} ---\\n")
+            print("\\n--- {} ---\\n".format(file_key))
             display_text(stripped)
         else:
             print("Invalid choice.")
     except ValueError:
         print("Invalid input.")
-
 
 def calculators_menu():
     """Display calculators menu."""
@@ -463,7 +426,6 @@ def calculators_menu():
         print("6. Information Gain Calculator")
         print("7. Math Expression Evaluator")
         print("0. Back to main menu")
-        
         choice = input("\\nSelect a calculator: ")
         if choice == "0":
             return
@@ -484,7 +446,6 @@ def calculators_menu():
         else:
             print("Invalid choice.")
 
-
 def main():
     """Main menu."""
     while True:
@@ -495,12 +456,11 @@ def main():
         print("2. Search All Content")
         print("3. Calculators")
         print("4. Quit")
-        
         choice = input("\\nChoose an option: ")
         if choice == "1":
             view_topic_menu()
         elif choice == "2":
-            search_all_topics()
+            search_all_topics_menu()
         elif choice == "3":
             calculators_menu()
         elif choice == "4":
@@ -509,31 +469,42 @@ def main():
         else:
             print("Invalid choice.")
 
-
 if __name__ == "__main__":
     main()
 '''
+    return template.replace("content_dict_str", content_dict_str).replace(
+        "display_names_str", display_names_str
+    )
 
 
-def check_file_size(content, filename, max_size=MAX_FILE_SIZE):
-    """Check if file content exceeds maximum size and warn if so."""
+def check_file_constraints(
+    content, filename, max_size=MAX_FILE_SIZE, max_line_length=MAX_LINE_LENGTH
+):
+    """Check file size and line lengths."""
     size = len(content)
     if size > max_size:
         print(f"WARNING: {filename} is {size} characters (exceeds {max_size})")
-        return False
-    return True
+
+    lines = content.split("\n")
+    max_len = max(len(line) for line in lines) if lines else 0
+    if max_len > max_line_length:
+        print(
+            f"WARNING: {filename} has line of {max_len} characters (exceeds {max_line_length})"
+        )
+
+    return size <= max_size
 
 
 def write_file(path, content, filename):
-    """Write file and check size."""
-    check_file_size(content, filename)
+    """Write file and check constraints."""
+    check_file_constraints(content, filename)
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)
     print(f"  Generated: {filename} ({len(content)} chars)")
 
 
 def generate_all(base_dir, output_dir):
-    """Generate all modules in flat structure (no subdirectories)."""
+    """Generate single file for Numworks."""
     # Find and group markdown files
     md_files = find_md_files(base_dir)
     topics = group_files_by_topic(md_files)
@@ -542,29 +513,15 @@ def generate_all(base_dir, output_dir):
     for topic, files in sorted(topics.items()):
         print(f"  - {topic}: {len(files)} files")
 
-    print(f"\nGenerating modules in {output_dir} (flat structure for Numworks):")
+    print(f"\nGenerating single file in {output_dir} for Numworks:")
 
-    # Generate utilities module
-    utilities_content = generate_utilities_module()
-    write_file(output_dir / "utilities.py", utilities_content, "utilities.py")
-
-    # Generate calculators module
-    calculators_content = generate_calculators_module()
-    write_file(output_dir / "calculators.py", calculators_content, "calculators.py")
-
-    # Generate content modules for each topic
-    for topic, files in sorted(topics.items()):
-        module_name = f"content_{sanitize_module_name(topic)}.py"
-        content = generate_content_module(topic, files)
-        write_file(output_dir / module_name, content, module_name)
-
-    # Generate main.py in same directory
-    main_content = generate_main_module(topics)
-    write_file(output_dir / "main.py", main_content, "main.py")
+    # Generate single file
+    single_content = generate_single_file(topics)
+    write_file(output_dir / "main.py", single_content, "main.py")
 
     print(f"\nGeneration complete!")
-    print(f"All files are in: {output_dir}")
-    print(f"Upload all .py files to your Numworks calculator, then run main.py")
+    print(f"Single file: {output_dir}/main.py")
+    print(f"Upload main.py to your Numworks calculator and run it")
 
 
 def main():

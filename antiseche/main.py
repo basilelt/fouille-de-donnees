@@ -13,18 +13,15 @@ from calculators import (
     information_gain_calculator,
     execute_math,
 )
-import content_part1
-import content_part2
+import content_cours
 
 # Topic modules registry
 TOPIC_MODULES = {
-    "part1": content_part1,
-    "part2": content_part2,
+    "cours": content_cours,
 }
 
 TOPICS = {
-    "1": ("part1", "Part1"),
-    "2": ("part2", "Part2"),
+    "1": ("cours", "Cours"),
 }
 
 

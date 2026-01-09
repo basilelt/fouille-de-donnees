@@ -2,133 +2,131 @@ import math
 
 
 def display_text(text, max_lines=20):
-    """Display text in chunks for limited screen."""
     lines = text.split("\n")
     for i in range(0, len(lines), max_lines):
         chunk = "\n".join(lines[i : i + max_lines])
         print(chunk)
         if i + max_lines < len(lines):
-            input("Press Enter to continue...")
-
-
-# Calculators functions
+            input("Enter...")
 
 
 def bayes_calculator():
-    """Interactive Bayes theorem calculator."""
-    print("Bayes Calculator")
+    print("Bayes")
+    print("P(A|B)=(P(A)*P(B|A))/P(B)")
     try:
-        prior = float(input("Enter prior probability P(H): "))
-        likelihood = float(input("Enter likelihood P(E|H): "))
-        evidence = float(input("Enter evidence P(E): "))
+        prior = float(input("P(A): "))
+        likelihood = float(input("P(B|A): "))
+        evidence = float(input("P(B): "))
         posterior = (prior * likelihood) / evidence
-        print("Posterior probability P(H|E): {}".format(posterior))
+        print("P(A|B):{}".format(posterior))
     except ValueError:
-        print("Invalid input. Please enter numbers.")
+        print("Invalid num.")
     except ZeroDivisionError:
-        print("Error: Evidence P(E) cannot be zero.")
+        print("P(B)!=0")
 
 
 def euclidean_distance_calculator():
-    """Interactive Euclidean distance calculator."""
-    print("Euclidean Distance Calculator")
+    print("Euclid Dist")
+    print("sqrt(sum((x_i-y_i)^2))")
     try:
-        n = int(input("Enter number of dimensions: "))
+        n = int(input("Dims: "))
         point1 = []
         point2 = []
         for i in range(n):
-            p1 = float(input("Enter coordinate {} for point 1: ".format(i + 1)))
-            p2 = float(input("Enter coordinate {} for point 2: ".format(i + 1)))
+            p1 = float(input("P1[{}]: ".format(i + 1)))
+            p2 = float(input("P2[{}]: ".format(i + 1)))
             point1.append(p1)
             point2.append(p2)
         distance = sum((a - b) ** 2 for a, b in zip(point1, point2)) ** 0.5
-        print("Euclidean distance: {}".format(distance))
+        print("Dist:{}".format(distance))
     except ValueError:
-        print("Invalid input. Please enter numbers.")
+        print("Invalid num.")
 
 
 def manhattan_distance_calculator():
-    """Interactive Manhattan distance calculator."""
-    print("Manhattan Distance Calculator")
+    print("Manhattan Dist")
+    print("sum(|x_i-y_i|)")
     try:
-        n = int(input("Enter number of dimensions: "))
+        n = int(input("Dims: "))
         point1 = []
         point2 = []
         for i in range(n):
-            p1 = float(input("Enter coordinate {} for point 1: ".format(i + 1)))
-            p2 = float(input("Enter coordinate {} for point 2: ".format(i + 1)))
+            p1 = float(input("P1[{}]: ".format(i + 1)))
+            p2 = float(input("P2[{}]: ".format(i + 1)))
             point1.append(p1)
             point2.append(p2)
         distance = sum(abs(a - b) for a, b in zip(point1, point2))
-        print("Manhattan distance: {}".format(distance))
+        print("Dist:{}".format(distance))
     except ValueError:
-        print("Invalid input. Please enter numbers.")
+        print("Invalid num.")
 
 
 def entropy_calculator():
-    """Interactive entropy calculator."""
-    print("Entropy Calculator")
+    print("Entropy")
+    print("-sum(p_i*log2(p_i))")
+    print("Enter probs. Enter to finish.")
     try:
         probs = []
         while True:
-            prob = input("Enter probability (or 'done'): ")
-            if prob.lower() == "done":
+            prob = input("Prob: ")
+            if not prob:
                 break
             probs.append(float(prob))
         if not probs:
-            print("No probabilities entered.")
+            print("No probs.")
             return
         entropy = -sum(p * math.log2(p) for p in probs if p > 0)
-        print("Entropy: {}".format(entropy))
+        print("Entropy:{}".format(entropy))
     except ValueError:
-        print("Invalid input. Please enter numbers.")
+        print("Invalid num.")
 
 
 def gini_calculator():
-    """Interactive Gini impurity calculator."""
-    print("Gini Impurity Calculator")
+    print("Gini")
+    print("1-sum(p_i^2)")
+    print("Enter probs. Enter to finish.")
     try:
         probs = []
         while True:
-            prob = input("Enter class probability (or 'done'): ")
-            if prob.lower() == "done":
+            prob = input("Prob: ")
+            if not prob:
                 break
             probs.append(float(prob))
         if not probs:
-            print("No probabilities entered.")
+            print("No probs.")
             return
         gini = 1 - sum(p**2 for p in probs)
-        print("Gini impurity: {}".format(gini))
+        print("Gini:{}".format(gini))
     except ValueError:
-        print("Invalid input. Please enter numbers.")
+        print("Invalid num.")
 
 
 def information_gain_calculator():
-    """Interactive information gain calculator."""
-    print("Information Gain Calculator")
+    print("Info Gain")
+    print("ParentEnt - weighted child ent")
     try:
-        parent_entropy = float(input("Enter parent entropy: "))
-        n_children = int(input("Enter number of child nodes: "))
-        total_samples = int(input("Enter total samples in parent: "))
+        parent_entropy = float(input("Parent ent: "))
+        n_children = int(input("Children: "))
+        total_samples = int(input("Total smp: "))
         weighted_child_entropy = 0
         for i in range(n_children):
-            samples = int(input("Enter samples in child {}: ".format(i + 1)))
-            entropy = float(input("Enter entropy of child {}: ".format(i + 1)))
+            samples = int(input("Smp{}: ".format(i + 1)))
+            entropy = float(input("Ent{}: ".format(i + 1)))
             weighted_child_entropy += (samples / total_samples) * entropy
         info_gain = parent_entropy - weighted_child_entropy
-        print("Information Gain: {}".format(info_gain))
+        print("Gain:{}".format(info_gain))
     except ValueError:
-        print("Invalid input. Please enter numbers.")
+        print("Invalid num.")
     except ZeroDivisionError:
-        print("Error: Total samples cannot be zero.")
+        print("Total!=0")
 
 
 def execute_math():
-    """Simple math expression evaluator."""
-    print("Math Executor")
-    print("Available functions: sqrt, sin, cos, tan, log, log2,")
-    print("log10, exp, pow, abs")
-    expr = input("Enter math expression: ")
+    print("Math")
+    print("Funcs: sqrt,sin,cos,tan")
+    print("log,log2,log10,exp,pow,abs")
+    print("Consts: pi,e")
+    expr = input("Expr: ")
     try:
         safe_dict = {
             "sqrt": math.sqrt,
@@ -145,24 +143,24 @@ def execute_math():
             "e": math.e,
         }
         result = eval(expr, {"__builtins__": {}}, safe_dict)
-        print("Result: {}".format(result))
+        print("Res:{}".format(result))
     except Exception as e:
-        print("Invalid expression: {}".format(e))
+        print("Error:{}".format(e))
 
 
-def calculators_menu():
-    """Display calculators menu."""
+def main():
+    print("Calc. 0=exit")
     while True:
-        print("\nCalculators:")
-        print("1. Bayes Calculator")
-        print("2. Euclidean Distance Calculator")
-        print("3. Manhattan Distance Calculator")
-        print("4. Entropy Calculator")
-        print("5. Gini Impurity Calculator")
-        print("6. Information Gain Calculator")
-        print("7. Math Expression Evaluator")
-        print("0. Back to main menu")
-        choice = input("\nSelect a calculator: ")
+        print("\nCalc:")
+        print("1.Bayes")
+        print("2.Euclid")
+        print("3.Manhattan")
+        print("4.Entropy")
+        print("5.Gini")
+        print("6.Info Gain")
+        print("7.Math")
+        print("0.Exit")
+        choice = input("Sel: ")
         if choice == "0":
             return
         elif choice == "1":
@@ -180,25 +178,7 @@ def calculators_menu():
         elif choice == "7":
             execute_math()
         else:
-            print("Invalid choice.")
-
-
-def main():
-    """Main menu."""
-    while True:
-        print("\n" + "=" * 50)
-        print("Data Mining Calculators")
-        print("=" * 50)
-        print("1. Calculators")
-        print("2. Quit")
-        choice = input("\nChoose an option: ")
-        if choice == "1":
-            calculators_menu()
-        elif choice == "2":
-            print("Goodbye!")
-            break
-        else:
-            print("Invalid choice.")
+            print("Invalid.")
 
 
 main()

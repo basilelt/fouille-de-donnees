@@ -1,5 +1,16 @@
 ## Hierarchical Clustering
 
+Advantages
+- Easy to understand
+- Allows easy variation in the number of clusters
+- Intuitive visualization
+
+Disadvantages
+- Computational cost of the distance matrix
+- The clustering criterion depends on the groups already formed
+- Different results depending on the clustering criterion
+
+
 What is the primary goal of clustering?
 Divide a set of objects into groups
 

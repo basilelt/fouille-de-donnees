@@ -1,5 +1,17 @@
 ## Decision Trees
 
+Advantages:
+- Interpretable: Trees are easy to understand and visualize.
+- Minimal Data Prep: No need for normalization or scaling.
+- Handle Multiple Types: Can deal with numerical and categorical data.
+- Non-linear Relationships: Naturally handles non-linearity in data.
+
+Disadvantages:
+- Overfitting: Trees can easily become too complex, capturing noise.
+- Instability: Small changes in data might result in a completely different tree.
+- Bias: Trees are biased to features with more levels.
+- Locally Optimal: Greedy algorithms might not always find the optimal tree.
+
 What is a Decision Tree primarily used for?
 Classification and regression
 

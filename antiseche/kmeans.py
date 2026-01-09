@@ -1,5 +1,16 @@
 ## KMeans
 
+Advantages:
+- Efficiency: Operates in linear time, making it very fast.
+- Interpretability: Clusters are easy to understand, centered around clear prototypes.
+- Simplicity: Minimal parameters required—just the number of clusters and iterations.
+
+Disadvantages:
+- Fixed k: Number of clusters must be specified in advance.
+- Prototypical Constraints: Limited to finding spherical-shaped clusters around centroids.
+- Initialization Sensitivity: Outcome heavily depends on the initial position of centroids.
+
+
 What is the primary objective of K-Means clustering?
 Minimize intra-cluster variance
 

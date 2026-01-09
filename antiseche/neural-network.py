@@ -1,5 +1,10 @@
 ## Neural Networks
 
+- The concept of training perceptrons—adjusting weights to correct errors—remains the foundation of modern neural networks.
+- Deep learning extends this principle by using multi-layer networks to solve more complex problems.
+- The same training approach is used across various applications, including image processing, speech recognition, and language models like GPT.
+
+
 Who developed the perceptron in the 1960s?
 Rosenblatt
 
@@ -37,7 +42,7 @@ Error correction
 
 
 What technique does Inception use to reduce computational cost?
-1×1 convolutions
+1x1 convolutions
 
 
 What activation function is commonly used in AlexNet?

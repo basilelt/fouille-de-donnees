@@ -1,5 +1,21 @@
 ## Time Series
 
+Key Takeaways:
+- Time series are temporally ordered datasets found in various fields like healthcare, finance, and engineering.
+- Key properties include temporal dependency, seasonality, and trends.
+
+Types of Time Series:
+- Univariate: Single variable over time (e.g., stock prices).
+- Multivariate: Multiple variables with dependencies (e.g., weather data).
+
+Techniques Discussed:
+- Decomposition into components (trend, seasonality, cyclic patterns, noise).
+- Statistical features (mean, standard deviation, Z-normalization).
+- Models: AR, MA, Fourier Transform, KNN, DTW, etc.
+- Imputation methods for missing data.
+- Dimensionality reduction (PAA, SAX).
+
+
 What is the key property of time series data?
 Temporal order matters
 

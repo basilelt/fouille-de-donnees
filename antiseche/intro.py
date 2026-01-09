@@ -1,5 +1,18 @@
 ## Intro
 
+- Understanding of Common Data Formats and Data Sources.
+- Differentiation between Structured vs. Unstructured Data.
+- Importance of Clean and Quality Data, including Data Cleaning Techniques.
+- Missing Data Handling and Outlier Detection.
+- Exploration of EDA and various Data Visualization Techniques.
+- Introduction to Popular Tools, Libraries, and Packages.
+- Descriptive vs. Inferential Statistics; Supervised vs. Unsupervised Learning.
+- Exploration of Bias-Variance Tradeoff and Data Mining Process Steps.
+- Emphasizing Understanding Business Objectives and Big Data.
+- Discussion of challenges in Handling Big Data.
+- Real-life and concrete examples of successful data mining applications.
+
+
 What is the primary objective of data mining?
 Discover patterns
 
